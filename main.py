@@ -1,29 +1,69 @@
 from tkinter import *
+from tkinter import messagebox
+import time
 
 # INITIALIZATIONS
 
-expression = ""
 
 main = Tk()
-main.geometry('500x200')
+main.geometry('270x150')
 main.title('Homebase v0.3')
 main.resizable(False, False)
+main.geometry('270x150')
+
+expression = ""
+hour = StringVar()
+minute = StringVar()
+second = StringVar()
+hour.set("00")
+minute.set("00")
+second.set("00")
 
 # FRAMES
 
+
 homeFrame = Frame(main)
 calcFrame = Frame(main)
+timerFrame = Frame(main)
 
 # FUNCTIONS
+
+
+def submit():
+    try:
+        temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
+    except:
+        print("Please input the right value")
+    while temp > -1:
+        mins, secs = divmod(temp, 60)
+        hours = 0
+        if mins > 60:
+            hours, mins = divmod(mins, 60)
+        hour.set("{0:2d}".format(hours))
+        minute.set("{0:2d}".format(mins))
+        second.set("{0:2d}".format(secs))
+        timerFrame.update()
+        time.sleep(1)
+        if temp == 0:
+            messagebox.showwarning('Time is up!', 'Time is up!')
+        temp -= 1
+
+
+def toTimer():
+    homeFrame.pack_forget()
+    timerFrame.pack()
+
 
 def returnHome():
     calcFrame.pack_forget()
     homeFrame.pack()
+    timerFrame.pack_forget()
+
 
 def calcScr():
     homeFrame.pack_forget()
     calcFrame.pack()
-    main.geometry('270x150')
+
 
 def press(num):
     global expression
@@ -41,23 +81,61 @@ def equalpress():
         equation.set(" error ")
         expression = ""
 
+
 def clear():
     global expression
     expression = ""
     equation.set("")
 
-        # HOME SCREEN
+# HOME SCREEN
 
-infoText = Label(homeFrame, text='Homebase v0.3')
+
+infoText = Label(homeFrame, text='Homebase v0.3', font=('Arial', 18, ''))
 calcButton = Button(homeFrame, text='Calculator', command=calcScr)
-infoText.pack()
-calcButton.pack()
+timerButton = Button(homeFrame, text='Timer', command=toTimer)
+infoText.grid(row=0, column=1, sticky=NSEW)
+calcButton.grid(row=1, column=1, sticky=NSEW)
+timerButton.grid(row=2, column=1, sticky=NSEW)
+
+homeFrame.grid_columnconfigure(1, weight=2)
+homeFrame.grid_rowconfigure(0, weight=2)
+homeFrame.grid_rowconfigure(1, weight=2)
+homeFrame.grid_rowconfigure(2, weight=2)
 
 homeFrame.pack()
 
+# TIMER SCREEN
+
+hourText = Label(timerFrame, text='Hours')
+hourText.grid(row=0, column=0, sticky=NSEW)
+minuteText = Label(timerFrame, text='Minutes')
+minuteText.grid(row=0, column=1, sticky=NSEW)
+secondText = Label(timerFrame, text='Seconds')
+secondText.grid(row=0, column=2, sticky=NSEW)
+hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour)
+hourEntry.grid(row=1, column=0, sticky=NSEW)
+minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute)
+minuteEntry.grid(row=1, column=1, sticky=NSEW)
+secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second)
+secondEntry.grid(row=1, column=2, sticky=NSEW)
+spacer1 = Label(timerFrame, text=" ")
+spacer1.grid(row=2, column=1, sticky=NSEW)
+timerSubmit = Button(timerFrame, text='Start Timer', command=submit)
+timerSubmit.grid(row=3, column=1, sticky=NSEW)
+toHome = Button(timerFrame, text='Home', command=returnHome, bg='green')
+toHome.grid(row=4, column=1, sticky=NSEW)
+timerFrame.grid_columnconfigure(0, weight=1)
+timerFrame.grid_columnconfigure(1, weight=1)
+timerFrame.grid_columnconfigure(2, weight=1)
+timerFrame.grid_rowconfigure(0, weight=1)
+timerFrame.grid_rowconfigure(1, weight=1)
+timerFrame.grid_rowconfigure(2, weight=1)
+timerFrame.grid_rowconfigure(3, weight=1)
+timerFrame.grid_rowconfigure(4, weight=1)
+
 # CALC SCREEN
 
-# Driver code
+
 if __name__ == "__main__":
     equation = StringVar()
     expression_field = Entry(calcFrame, textvariable=equation)
