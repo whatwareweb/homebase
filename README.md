@@ -1,4 +1,4 @@
 # homebase
 WhatWare HomeBase application
 
-Development branch for HomeBase
+This is a simple python app that has lots of basic functions.
