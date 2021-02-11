@@ -18,6 +18,8 @@ second = StringVar()
 hour.set("00")
 minute.set("00")
 second.set("00")
+pauseState = 0
+
 
 # FRAMES
 
@@ -26,15 +28,33 @@ homeFrame = Frame(main)
 calcFrame = Frame(main)
 timerFrame = Frame(main)
 
+
 # FUNCTIONS
+
+
+def timerStop():
+    global pauseState
+    pauseState = 1
+
+
+def timerPause():
+    global pauseState
+    if pauseState == 0:
+        pauseState = 1
+        print('one')
+    elif pauseState == 1:
+        pauseState = 0
+        submit()
+        print('zero')
+    timerFrame.update()
 
 
 def submit():
     try:
         temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
     except:
-        print("Please input the right value")
-    while temp > -1:
+        return
+    while temp > -1 and pauseState == 0:
         mins, secs = divmod(temp, 60)
         hours = 0
         if mins > 60:
@@ -44,9 +64,13 @@ def submit():
         second.set("{0:2d}".format(secs))
         timerFrame.update()
         time.sleep(1)
-        if temp == 0:
+        if temp == 0 and pauseState == 0:
             messagebox.showwarning('Time is up!', 'Time is up!')
-        temp -= 1
+        if pauseState == 0:
+            temp -= 1
+            timerFrame.update()
+        if pauseState == 2:
+            temp = 0
 
 
 def toTimer():
@@ -87,6 +111,7 @@ def clear():
     expression = ""
     equation.set("")
 
+
 # HOME SCREEN
 
 
@@ -97,10 +122,10 @@ infoText.grid(row=0, column=1, sticky=NSEW)
 calcButton.grid(row=1, column=1, sticky=NSEW)
 timerButton.grid(row=2, column=1, sticky=NSEW)
 
-homeFrame.grid_columnconfigure(1, weight=2)
-homeFrame.grid_rowconfigure(0, weight=2)
-homeFrame.grid_rowconfigure(1, weight=2)
-homeFrame.grid_rowconfigure(2, weight=2)
+homeFrame.grid_columnconfigure(1, weight=1)
+homeFrame.grid_rowconfigure(0, weight=1)
+homeFrame.grid_rowconfigure(1, weight=1)
+homeFrame.grid_rowconfigure(2, weight=1)
 
 homeFrame.pack()
 
@@ -120,8 +145,12 @@ secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=se
 secondEntry.grid(row=1, column=2, sticky=NSEW)
 spacer1 = Label(timerFrame, text=" ")
 spacer1.grid(row=2, column=1, sticky=NSEW)
-timerSubmit = Button(timerFrame, text='Start Timer', command=submit)
+timerPauseButton = Button(timerFrame, text='Pause/Unpause', command=timerPause)
+timerPauseButton.grid(row=3, column=0, sticky=NSEW)
+timerSubmit = Button(timerFrame, text='Start Timer', command=submit, bg='blue')
 timerSubmit.grid(row=3, column=1, sticky=NSEW)
+timerStopButton = Button(timerFrame, text='Stop', command=timerStop)
+timerStopButton.grid(row=3, column=2, sticky=NSEW)
 toHome = Button(timerFrame, text='Home', command=returnHome, bg='green')
 toHome.grid(row=4, column=1, sticky=NSEW)
 timerFrame.grid_columnconfigure(0, weight=1)
