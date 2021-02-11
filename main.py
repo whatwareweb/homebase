@@ -119,7 +119,7 @@ def clear():
 # HOME SCREEN
 
 
-infoText = Label(homeFrame, text='Homebase v0.3', font=('Arial', 18, ''))
+infoText = Label(homeFrame, text='Homebase v0.4', font=('Arial', 18, ''))
 calcButton = Button(homeFrame, text='Calculator', command=calcScr)
 timerButton = Button(homeFrame, text='Timer', command=toTimer)
 infoText.grid(row=0, column=1, sticky=NSEW)
