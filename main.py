@@ -7,9 +7,10 @@ import time
 
 main = Tk()
 main.geometry('270x150')
-main.title('Homebase v0.3')
+main.title('Homebase v0.4')
 main.resizable(False, False)
 main.geometry('270x150')
+main.iconbitmap('homebase-logo.ico')
 
 expression = ""
 hour = StringVar()
@@ -50,6 +51,9 @@ def timerPause():
 
 
 def submit():
+    global pauseState
+    if pauseState == 1:
+        pauseState = 0
     try:
         temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
     except:
