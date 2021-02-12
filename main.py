@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 import time
+from playsound import playsound
+from threading import Thread
 
 # INITIALIZATIONS
 
@@ -34,14 +36,25 @@ timerFrame = Frame(main)
 # FUNCTIONS
 
 
+def timersound():
+    playsound('alarm.wav')
+
+
+def timermsg():
+    messagebox.showwarning('Time is up!', 'Time is up!')
+
+
 def keyPressed(event):
     char_list = ['/', '*', '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     if currentFrame == 'calculator':
-        print(event)
         if event.char in char_list:
             press(event.char)
         elif event.char == '=' or event.char == '\r':
             equalpress()
+    if currentFrame == 'timer':
+        print('timer key pressed')
+        if event.char == '\r':
+            submit()
 
 
 def timerStop():
@@ -82,7 +95,10 @@ def submit():
         timerFrame.update()
         time.sleep(1)
         if temp == 0 and pauseState == 0:
-            messagebox.showwarning('Time is up!', 'Time is up!')
+            a = Thread(target=timersound)
+            b = Thread(target=timermsg)
+            a.start()
+            b.start()
         if pauseState == 0:
             temp -= 1
             timerFrame.update()
@@ -91,6 +107,8 @@ def submit():
 
 
 def toTimer():
+    global currentFrame
+    currentFrame = 'timer'
     homeFrame.pack_forget()
     timerFrame.pack()
 
