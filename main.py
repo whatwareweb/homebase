@@ -20,7 +20,8 @@ hour.set("00")
 minute.set("00")
 second.set("00")
 pauseState = 0
-
+equation = StringVar()
+currentFrame = 'home'
 
 # FRAMES
 
@@ -33,6 +34,16 @@ timerFrame = Frame(main)
 # FUNCTIONS
 
 
+def keyPressed(event):
+    char_list = ['/', '*', '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    if currentFrame == 'calculator':
+        print(event)
+        if event.char in char_list:
+            press(event.char)
+        elif event.char == '=' or event.char == '\r':
+            equalpress()
+
+
 def timerStop():
     global pauseState
     pauseState = 1
@@ -40,13 +51,15 @@ def timerStop():
 
 def timerPause():
     global pauseState
+    global timerPauseButton
     if pauseState == 0:
         pauseState = 1
-        print('one')
+        timerPauseButton['text'] = 'Unpause'
     elif pauseState == 1:
         pauseState = 0
+        timerPauseButton['text'] = 'Pause'
         submit()
-        print('zero')
+    timerPauseButton.update()
     timerFrame.update()
 
 
@@ -83,12 +96,16 @@ def toTimer():
 
 
 def returnHome():
+    global currentFrame
+    currentFrame = 'home'
     calcFrame.pack_forget()
     homeFrame.pack()
     timerFrame.pack_forget()
 
 
 def calcScr():
+    global currentFrame
+    currentFrame = 'calculator'
     homeFrame.pack_forget()
     calcFrame.pack()
 
@@ -135,6 +152,7 @@ homeFrame.pack()
 
 # TIMER SCREEN
 
+
 hourText = Label(timerFrame, text='Hours')
 hourText.grid(row=0, column=0, sticky=NSEW)
 minuteText = Label(timerFrame, text='Minutes')
@@ -149,7 +167,7 @@ secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=se
 secondEntry.grid(row=1, column=2, sticky=NSEW)
 spacer1 = Label(timerFrame, text=" ")
 spacer1.grid(row=2, column=1, sticky=NSEW)
-timerPauseButton = Button(timerFrame, text='Pause/Unpause', command=timerPause)
+timerPauseButton = Button(timerFrame, text='Pause', command=timerPause)
 timerPauseButton.grid(row=3, column=0, sticky=NSEW)
 timerSubmit = Button(timerFrame, text='Start Timer', command=submit, bg='blue')
 timerSubmit.grid(row=3, column=1, sticky=NSEW)
@@ -169,64 +187,45 @@ timerFrame.grid_rowconfigure(4, weight=1)
 # CALC SCREEN
 
 
-if __name__ == "__main__":
-    equation = StringVar()
-    expression_field = Entry(calcFrame, textvariable=equation)
-    expression_field.grid(columnspan=4, ipadx=70)
-    equation.set('enter your expression')
-    button1 = Button(calcFrame, text=' 1 ',
-                     command=lambda: press(1), height=1, width=7)
-    button1.grid(row=2, column=0)
-    button2 = Button(calcFrame, text=' 2 ',
-                     command=lambda: press(2), height=1, width=7)
-    button2.grid(row=2, column=1)
-    button3 = Button(calcFrame, text=' 3 ',
-                     command=lambda: press(3), height=1, width=7)
-    button3.grid(row=2, column=2)
-    button4 = Button(calcFrame, text=' 4 ',
-                     command=lambda: press(4), height=1, width=7)
-    button4.grid(row=3, column=0)
-    button5 = Button(calcFrame, text=' 5 ',
-                     command=lambda: press(5), height=1, width=7)
-    button5.grid(row=3, column=1)
-    button6 = Button(calcFrame, text=' 6 ',
-                     command=lambda: press(6), height=1, width=7)
-    button6.grid(row=3, column=2)
-    button7 = Button(calcFrame, text=' 7 ',
-                     command=lambda: press(7), height=1, width=7)
-    button7.grid(row=4, column=0)
-    button8 = Button(calcFrame, text=' 8 ',
-                     command=lambda: press(8), height=1, width=7)
-    button8.grid(row=4, column=1)
-    button9 = Button(calcFrame, text=' 9 ',
-                     command=lambda: press(9), height=1, width=7)
-    button9.grid(row=4, column=2)
-    button0 = Button(calcFrame, text=' 0 ',
-                     command=lambda: press(0), height=1, width=7)
-    button0.grid(row=5, column=0)
-    plus = Button(calcFrame, text=' + ',
-                  command=lambda: press("+"), height=1, width=7)
-    plus.grid(row=2, column=3)
-    minus = Button(calcFrame, text=' - ',
-                   command=lambda: press("-"), height=1, width=7)
-    minus.grid(row=3, column=3)
-    multiply = Button(calcFrame, text=' × ',
-                      command=lambda: press("×"), height=1, width=7)
-    multiply.grid(row=4, column=3)
-    divide = Button(calcFrame, text=' ÷ ',
-                    command=lambda: press("÷"), height=1, width=7)
-    divide.grid(row=5, column=3)
-    equal = Button(calcFrame, text=' = ',
-                   command=equalpress, height=1, width=7)
-    equal.grid(row=5, column=2)
-    clear = Button(calcFrame, text='Clear',
-                   command=clear, height=1, width=7)
-    clear.grid(row=5, column='1')
-    Decimal = Button(calcFrame, text='.',
-                     command=lambda: press('.'), height=1, width=7)
-    Decimal.grid(row=6, column=0)
-    Home = Button(calcFrame, text='Home', bg='green',
-                  command=returnHome, height=1, width=7)
-    Home.grid(row=6, column=3)
+expression_field = Entry(calcFrame, textvariable=equation)
+expression_field.grid(columnspan=4, ipadx=70)
+equation.set('Enter your equation!')
+button1 = Button(calcFrame, text=' 1 ', command=lambda: press(1), height=1, width=7)
+button1.grid(row=2, column=0)
+button2 = Button(calcFrame, text=' 2 ', command=lambda: press(2), height=1, width=7)
+button2.grid(row=2, column=1)
+button3 = Button(calcFrame, text=' 3 ', command=lambda: press(3), height=1, width=7)
+button3.grid(row=2, column=2)
+button4 = Button(calcFrame, text=' 4 ', command=lambda: press(4), height=1, width=7)
+button4.grid(row=3, column=0)
+button5 = Button(calcFrame, text=' 5 ', command=lambda: press(5), height=1, width=7)
+button5.grid(row=3, column=1)
+button6 = Button(calcFrame, text=' 6 ', command=lambda: press(6), height=1, width=7)
+button6.grid(row=3, column=2)
+button7 = Button(calcFrame, text=' 7 ', command=lambda: press(7), height=1, width=7)
+button7.grid(row=4, column=0)
+button8 = Button(calcFrame, text=' 8 ', command=lambda: press(8), height=1, width=7)
+button8.grid(row=4, column=1)
+button9 = Button(calcFrame, text=' 9 ', command=lambda: press(9), height=1, width=7)
+button9.grid(row=4, column=2)
+button0 = Button(calcFrame, text=' 0 ', command=lambda: press(0), height=1, width=7)
+button0.grid(row=5, column=0)
+plus = Button(calcFrame, text=' + ', command=lambda: press("+"), height=1, width=7)
+plus.grid(row=2, column=3)
+minus = Button(calcFrame, text=' - ', command=lambda: press("-"), height=1, width=7)
+minus.grid(row=3, column=3)
+multiply = Button(calcFrame, text=' × ', command=lambda: press("×"), height=1, width=7)
+multiply.grid(row=4, column=3)
+divide = Button(calcFrame, text=' ÷ ', command=lambda: press("÷"), height=1, width=7)
+divide.grid(row=5, column=3)
+equal = Button(calcFrame, text=' = ', command=equalpress, height=1, width=7)
+equal.grid(row=5, column=2)
+clear = Button(calcFrame, text='Clear', command=clear, height=1, width=7)
+clear.grid(row=5, column='1')
+Decimal = Button(calcFrame, text='.', command=lambda: press('.'), height=1, width=7)
+Decimal.grid(row=6, column=0)
+Home = Button(calcFrame, text='Home', bg='green', command=returnHome, height=1, width=7)
+Home.grid(row=6, column=3)
+main.bind("<KeyPress>", keyPressed)
 
 main.mainloop()
