@@ -55,12 +55,9 @@ settingsFrame.configure(bg=themebg)
 
 
 def themeSel():
-    print(f'function called with var {themeVar.get()}')
     if themeVar.get() == 0:
-        print('dark selected')
         settings['theme'] = 'dark'
     elif themeVar.get() == 1:
-        print('light selected')
         settings['theme'] = 'light'
     with open('settings.json', 'w') as b:
         json.dump(settings, b)
@@ -95,6 +92,7 @@ def timermsg():
     messagebox.showwarning('Time is up!', 'Time is up!')
 
 
+
 def keyPressed(event):
     char_list = ['/', '*', '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     if currentFrame == 'calculator':
@@ -124,6 +122,10 @@ def calcBack():
 def timerStop():
     global pauseState
     pauseState = 1
+    hour.set('00')
+    minute.set('00')
+    second.set('00')
+
 
 
 def timerPause():
@@ -228,6 +230,7 @@ def calcclear():
     expressionText = ""
 
 def buttondefinitions():
+    global timerPauseButton
     # HOME SCREEN
 
     infoText = Label(homeFrame, text='Homebase v0.4', font=('Arial', 18, ''), bg=themebg, fg=themefg)
@@ -254,11 +257,11 @@ def buttondefinitions():
     minuteText.grid(row=0, column=1, sticky=NSEW)
     secondText = Label(timerFrame, text='Seconds', bg=themebg, fg=themefg)
     secondText.grid(row=0, column=2, sticky=NSEW)
-    hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour, bg=themebg, fg=themefg)
+    hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour, bg=themebg, fg=themefg, insertbackground=themefg)
     hourEntry.grid(row=1, column=0, sticky=NSEW)
-    minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute, bg=themebg, fg=themefg)
+    minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute, bg=themebg, fg=themefg, insertbackground=themefg)
     minuteEntry.grid(row=1, column=1, sticky=NSEW)
-    secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg)
+    secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg, insertbackground=themefg)
     secondEntry.grid(row=1, column=2, sticky=NSEW)
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
     spacer1.grid(row=2, column=1, sticky=NSEW)
