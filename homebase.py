@@ -3,6 +3,7 @@ from tkinter import messagebox
 import time
 from playsound import playsound
 from threading import Thread
+import json
 
 # INITIALIZATIONS
 
@@ -14,16 +15,28 @@ main.resizable(False, False)
 main.geometry('270x150')
 main.iconbitmap('homebase-logo.ico')
 
-expression = ""
+expression = ''
+expressionText = ''
 hour = StringVar()
 minute = StringVar()
 second = StringVar()
-hour.set("00")
-minute.set("00")
-second.set("00")
+hour.set('00')
+minute.set('00')
+second.set('00')
 pauseState = 0
 equation = StringVar()
 currentFrame = 'home'
+with open("settings.json", "r") as a:
+    settings = json.load(a)
+if settings['theme'] == 'dark':
+    themefg = 'gray'
+    themebg = 'black'
+else:
+    themefg = 'black'
+    themebg = 'white'
+main.configure(bg=themebg)
+themeVar = IntVar()
+
 
 # FRAMES
 
@@ -31,13 +44,44 @@ currentFrame = 'home'
 homeFrame = Frame(main)
 calcFrame = Frame(main)
 timerFrame = Frame(main)
+settingsFrame = Frame(main)
+homeFrame.configure(bg=themebg)
+calcFrame.configure(bg=themebg)
+timerFrame.configure(bg=themebg)
+settingsFrame.configure(bg=themebg)
 
 
 # FUNCTIONS
 
 
+def themeSel():
+    print(f'function called with var {themeVar.get()}')
+    if themeVar.get() == 0:
+        print('dark selected')
+        settings['theme'] = 'dark'
+    elif themeVar.get() == 1:
+        print('light selected')
+        settings['theme'] = 'light'
+    with open('settings.json', 'w') as b:
+        json.dump(settings, b)
+    global themefg
+    global themebg
+    if settings['theme'] == 'dark':
+        themefg = 'gray'
+        themebg = 'black'
+    else:
+        themefg = 'black'
+        themebg = 'white'
+    main.update()
+
+
+def toSettings():
+    homeFrame.pack_forget()
+    settingsFrame.pack()
+
+
 def timersound():
-    playsound('alarm.wav')
+    playsound(settings['customalarm'])
 
 
 def timermsg():
@@ -51,10 +95,23 @@ def keyPressed(event):
             press(event.char)
         elif event.char == '=' or event.char == '\r':
             equalpress()
+        elif event.char == '\x08':
+            calcBack()
+        elif event.keycode == 46:
+            calcclear()
     if currentFrame == 'timer':
-        print('timer key pressed')
         if event.char == '\r':
             submit()
+
+
+def calcBack():
+    global expression
+    global expressionText
+    mod_string = expression[:int(len(expression)) - 1]
+    modStringTwo = expressionText[:int(len(expressionText)) - 1]
+    expression = mod_string
+    expressionText = modStringTwo
+    equation.set(expressionText)
 
 
 def timerStop():
@@ -119,6 +176,7 @@ def returnHome():
     calcFrame.pack_forget()
     homeFrame.pack()
     timerFrame.pack_forget()
+    settingsFrame.pack_forget()
 
 
 def calcScr():
@@ -130,36 +188,50 @@ def calcScr():
 
 def press(num):
     global expression
-    expression = expression + str(num)
-    equation.set(expression)
+    global expressionText
+    expression = f'{expression}{str(num)}'
+    if num == '/':
+        expressionText = f'{expressionText}÷'
+    elif num == '*':
+        expressionText = f'{expressionText}×'
+    else:
+        expressionText = f'{expressionText}{str(num)}'
+    equation.set(expressionText)
 
 
 def equalpress():
     try:
         global expression
+        global expressionText
         total = str(eval(expression))
         equation.set(total)
-        expression = ""
+        expression = ''
+        expressionText = ''
     except:
-        equation.set(" error ")
-        expression = ""
+        equation.set(' error ')
+        expression = ''
+        expressionText = ''
 
 
-def clear():
+def calcclear():
     global expression
+    global expressionText
     expression = ""
     equation.set("")
+    expressionText = ""
 
 
 # HOME SCREEN
 
 
-infoText = Label(homeFrame, text='Homebase v0.4', font=('Arial', 18, ''))
-calcButton = Button(homeFrame, text='Calculator', command=calcScr)
-timerButton = Button(homeFrame, text='Timer', command=toTimer)
+infoText = Label(homeFrame, text='Homebase v0.4', font=('Arial', 18, ''), bg=themebg, fg=themefg)
+calcButton = Button(homeFrame, text='Calculator', command=calcScr, bg=themebg, fg=themefg)
+timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
+settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
 infoText.grid(row=0, column=1, sticky=NSEW)
 calcButton.grid(row=1, column=1, sticky=NSEW)
 timerButton.grid(row=2, column=1, sticky=NSEW)
+settingsButton.grid(row=3, column=1, sticky=NSEW)
 
 homeFrame.grid_columnconfigure(1, weight=1)
 homeFrame.grid_rowconfigure(0, weight=1)
@@ -232,18 +304,31 @@ plus = Button(calcFrame, text=' + ', command=lambda: press("+"), height=1, width
 plus.grid(row=2, column=3)
 minus = Button(calcFrame, text=' - ', command=lambda: press("-"), height=1, width=7)
 minus.grid(row=3, column=3)
-multiply = Button(calcFrame, text=' × ', command=lambda: press("×"), height=1, width=7)
+multiply = Button(calcFrame, text=' × ', command=lambda: press("*"), height=1, width=7)
 multiply.grid(row=4, column=3)
-divide = Button(calcFrame, text=' ÷ ', command=lambda: press("÷"), height=1, width=7)
+divide = Button(calcFrame, text=' ÷ ', command=lambda: press("/"), height=1, width=7)
 divide.grid(row=5, column=3)
 equal = Button(calcFrame, text=' = ', command=equalpress, height=1, width=7)
 equal.grid(row=5, column=2)
-clear = Button(calcFrame, text='Clear', command=clear, height=1, width=7)
+clear = Button(calcFrame, text='Clear', command=calcclear, height=1, width=7)
 clear.grid(row=5, column='1')
 Decimal = Button(calcFrame, text='.', command=lambda: press('.'), height=1, width=7)
 Decimal.grid(row=6, column=0)
 Home = Button(calcFrame, text='Home', bg='green', command=returnHome, height=1, width=7)
 Home.grid(row=6, column=3)
 main.bind("<KeyPress>", keyPressed)
+
+
+# SETTINGS SCREEN
+
+
+darkRadio = Radiobutton(settingsFrame, text='Dark mode', variable=themeVar, command=themeSel,
+                        value=0, bg=themebg, fg=themefg)
+lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
+                         value=1, bg=themebg, fg=themefg)
+homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
+darkRadio.grid(row=0, column=0)
+lightRadio.grid(row=1, column=0)
+homeButton.grid(row=2, column=0)
 
 main.mainloop()
