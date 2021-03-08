@@ -4,6 +4,8 @@ import time
 from playsound import playsound
 from threading import Thread
 import json
+import subprocess
+import platform
 
 # INITIALIZATIONS
 
@@ -13,7 +15,10 @@ main.geometry('270x150')
 main.title('Homebase')
 main.resizable(False, False)
 main.geometry('270x150')
-main.iconbitmap('homebase-logo.ico')
+try:
+    main.iconbitmap('homebase-logo.ico')
+except:
+    main.iconbitmap('./homebase-logo.ico')
 
 expression = ''
 expressionText = ''
@@ -22,9 +27,15 @@ minute = StringVar()
 second = StringVar()
 pauseState = 0
 equation = StringVar()
+pingaddr = StringVar()
 currentFrame = 'home'
-with open("settings.json", "r") as a:
-    settings = json.load(a)
+try:
+    with open("settings.json", "r") as a:
+        settings = json.load(a)
+except:
+    with open("./settings.json", "r") as a:
+        settings = json.load(a)
+
 if settings['theme'] == 'dark':
     themefg = 'gray'
     themebg = 'black'
@@ -42,13 +53,34 @@ homeFrame = Frame(main)
 calcFrame = Frame(main)
 timerFrame = Frame(main)
 settingsFrame = Frame(main)
+pingFrame = Frame(main)
 homeFrame.configure(bg=themebg)
 calcFrame.configure(bg=themebg)
 timerFrame.configure(bg=themebg)
 settingsFrame.configure(bg=themebg)
+pingFrame.configure(bg=themebg)
 
 
 # FUNCTIONS
+
+
+def ping():
+    try:
+        host = pingaddr.get()
+        param = '-n' if platform.system().lower() == 'windows' else '-c'
+        command = ['ping', param, '1', host]
+        pingaddr.set(subprocess.call(command) == 0)
+    except:
+        pingaddr.set('Error!')
+    if pingaddr.get() == '0':
+        pingaddr.set('Error!')
+    else:
+        pingaddr.set(f'{host} is up')
+
+
+def topinger():
+    homeFrame.pack_forget()
+    pingFrame.pack()
 
 
 def themeSel():
@@ -74,6 +106,7 @@ def themeSel():
     homeFrame.configure(bg=themebg)
     calcFrame.configure(bg=themebg)
     timerFrame.configure(bg=themebg)
+    pingFrame.configure(bg=themebg)
 
 
 def toSettings():
@@ -189,6 +222,7 @@ def returnHome():
     homeFrame.pack()
     timerFrame.pack_forget()
     settingsFrame.pack_forget()
+    pingFrame.pack_forget()
 
 
 def calcScr():
@@ -234,16 +268,19 @@ def calcclear():
 
 def buttondefinitions():
     global timerPauseButton
+    spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
     # HOME SCREEN
 
     infoText = Label(homeFrame, text='Homebase', font=('Arial', 18, ''), bg=themebg, fg=themefg)
     calcButton = Button(homeFrame, text='Calculator', command=calcScr, bg=themebg, fg=themefg)
     timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
-    infoText.grid(row=0, column=1, sticky=NSEW)
-    calcButton.grid(row=1, column=1, sticky=NSEW)
-    timerButton.grid(row=2, column=1, sticky=NSEW)
-    settingsButton.grid(row=3, column=1, sticky=NSEW)
+    pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
+    infoText.grid(row=0, column=0, sticky=NSEW)
+    calcButton.grid(row=1, column=0, sticky=NSEW)
+    timerButton.grid(row=2, column=0, sticky=NSEW)
+    settingsButton.grid(row=4, column=0, sticky=NSEW)
+    pingButton.grid(row=3, column=0, sticky=NSEW)
 
     homeFrame.grid_columnconfigure(1, weight=1)
     homeFrame.grid_rowconfigure(0, weight=1)
@@ -251,6 +288,17 @@ def buttondefinitions():
     homeFrame.grid_rowconfigure(2, weight=1)
 
     homeFrame.pack()
+
+    # PING SCREEN
+
+    pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
+    pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
+    pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
+    homebutton = Button(pingFrame, text='Home', command=returnHome, bg=themebg, fg=themefg)
+    pingText.grid(row=0, column=0)
+    pingEntry.grid(row=1, column=0)
+    pingbutton.grid(row=1, column=1)
+    homebutton.grid(row=2, column=0)
 
     # TIMER SCREEN
 
@@ -266,7 +314,6 @@ def buttondefinitions():
     minuteEntry.grid(row=1, column=1, sticky=NSEW)
     secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg, insertbackground=themefg)
     secondEntry.grid(row=1, column=2, sticky=NSEW)
-    spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
     spacer1.grid(row=2, column=1, sticky=NSEW)
     timerPauseButton = Button(timerFrame, text='Pause', command=timerPause, bg=themebg, fg=themefg)
     timerPauseButton.grid(row=3, column=0, sticky=NSEW)
@@ -340,7 +387,7 @@ def buttondefinitions():
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
                              value=1, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
-    versionNum = Label(settingsFrame, text='Version 0.7', fg=themefg, bg=themebg)
+    versionNum = Label(settingsFrame, text='Version 0.8', fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
     homeButton.grid(row=2, column=0)
