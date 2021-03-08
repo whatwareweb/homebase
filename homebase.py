@@ -20,9 +20,6 @@ expressionText = ''
 hour = StringVar()
 minute = StringVar()
 second = StringVar()
-hour.set('00')
-minute.set('00')
-second.set('00')
 pauseState = 0
 equation = StringVar()
 currentFrame = 'home'
@@ -122,9 +119,9 @@ def calcBack():
 def timerStop():
     global pauseState
     pauseState = 1
-    hour.set('00')
-    minute.set('00')
-    second.set('00')
+    hour.set('')
+    minute.set('')
+    second.set('')
 
 
 
@@ -143,6 +140,12 @@ def timerPause():
 
 
 def submit():
+    if hour.get() == '':
+        hour.set('0')
+    if minute.get() == '':
+        minute.set('0')
+    if second.get() == '':
+        second.set('0')
     global pauseState
     if pauseState == 1:
         pauseState = 0
@@ -326,6 +329,11 @@ def buttondefinitions():
     main.bind("<KeyPress>", keyPressed)
 
     # SETTINGS SCREEN
+
+    if settings['theme'] == 'dark':
+        themeVar.set('0')
+    elif settings['theme'] == 'light':
+        themeVar.set(1)
 
     darkRadio = Radiobutton(settingsFrame, text='Dark mode', variable=themeVar, command=themeSel,
                             value=0, bg=themebg, fg=themefg)
