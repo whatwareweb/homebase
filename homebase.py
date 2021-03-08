@@ -10,7 +10,7 @@ import json
 
 main = Tk()
 main.geometry('270x150')
-main.title('Homebase v0.4')
+main.title('Homebase')
 main.resizable(False, False)
 main.geometry('270x150')
 main.iconbitmap('homebase-logo.ico')
@@ -236,7 +236,7 @@ def buttondefinitions():
     global timerPauseButton
     # HOME SCREEN
 
-    infoText = Label(homeFrame, text='Homebase v0.4', font=('Arial', 18, ''), bg=themebg, fg=themefg)
+    infoText = Label(homeFrame, text='Homebase', font=('Arial', 18, ''), bg=themebg, fg=themefg)
     calcButton = Button(homeFrame, text='Calculator', command=calcScr, bg=themebg, fg=themefg)
     timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
@@ -340,9 +340,11 @@ def buttondefinitions():
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
                              value=1, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
+    versionNum = Label(settingsFrame, text='Version 0.7', fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
     homeButton.grid(row=2, column=0)
+    versionNum.grid(row=3, column=0)
 
 buttondefinitions()
 
