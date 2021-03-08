@@ -387,7 +387,7 @@ def buttondefinitions():
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
                              value=1, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
-    versionNum = Label(settingsFrame, text='Version 0.8', fg=themefg, bg=themebg)
+    versionNum = Label(settingsFrame, text='Version 0.9.1', fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
     homeButton.grid(row=2, column=0)
