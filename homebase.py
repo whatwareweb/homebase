@@ -102,7 +102,7 @@ def keyPressed(event):
         elif event.keycode == 46:
             calcclear()
     if currentFrame == 'timer':
-        if event.char == '\r':
+        if event.char == '\r' or event.char() == '=':
             submit()
 
 
