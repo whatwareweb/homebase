@@ -135,7 +135,7 @@ def keyPressed(event):
         elif event.keycode == 46:
             calcclear()
     if currentFrame == 'timer':
-        if event.char == '\r' or event.char() == '=':
+        if event.char == '\r' or event.char == '=':
             submit()
 
 
@@ -269,6 +269,8 @@ def calcclear():
 def buttondefinitions():
     global timerPauseButton
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
+    
+    
     # HOME SCREEN
 
     infoText = Label(homeFrame, text='Homebase', font=('Arial', 18, ''), bg=themebg, fg=themefg)
@@ -323,14 +325,14 @@ def buttondefinitions():
     timerStopButton.grid(row=3, column=2, sticky=NSEW)
     toHome = Button(timerFrame, text='Home', command=returnHome, bg='green', fg=themefg)
     toHome.grid(row=4, column=1, sticky=NSEW)
-    timerFrame.grid_columnconfigure(0, weight=1)
-    timerFrame.grid_columnconfigure(1, weight=1)
-    timerFrame.grid_columnconfigure(2, weight=1)
-    timerFrame.grid_rowconfigure(0, weight=1)
-    timerFrame.grid_rowconfigure(1, weight=1)
-    timerFrame.grid_rowconfigure(2, weight=1)
-    timerFrame.grid_rowconfigure(3, weight=1)
-    timerFrame.grid_rowconfigure(4, weight=1)
+    timerFrame.columnconfigure(0, weight=1)
+    timerFrame.columnconfigure(1, weight=1)
+    timerFrame.columnconfigure(2, weight=1)
+    timerFrame.rowconfigure(0, weight=1)
+    timerFrame.rowconfigure(1, weight=1)
+    timerFrame.rowconfigure(2, weight=1)
+    timerFrame.rowconfigure(3, weight=1)
+    timerFrame.rowconfigure(4, weight=1)
 
     # CALC SCREEN
 
