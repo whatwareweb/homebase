@@ -1,7 +1,6 @@
 """
 TO DO:
 - Fix "theme change issue" where calculator entry widget does not change theme
-- (Line 416) Minimize on close option(linux)/close to tray (windows)
 """
 
 from playsound import playsound
@@ -18,6 +17,7 @@ from appdirs import *
 # INITIALIZATIONS
 
 
+hb_version = "0.9.2"
 main = Tk()
 main.geometry('270x150')
 main.title('Homebase')
@@ -36,6 +36,7 @@ second = StringVar()
 pauseState = 0
 equation = StringVar()
 pingaddr = StringVar()
+mttVar = IntVar()
 currentFrame = 'home'
 settingspath = 0
 try:
@@ -44,6 +45,11 @@ try:
 except:
     with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
         settings = json.load(a)
+
+if settings["minimizetotray"] == True:
+    main.protocol("WM_DELETE_WINDOW", main.iconify)
+else:
+    main.protocol("WM_DELETE_WINDOW", main.destroy)
 
 if settings['theme'] == 'dark':
     themefg = 'gray'
@@ -73,6 +79,17 @@ pingFrame.configure(bg=themebg)
 # FUNCTIONS
 
 
+def mtt():
+    if mttVar.get() == 0:
+        settings["minimizetotray"] = False
+        main.protocol("WM_DELETE_WINDOW", main.destroy)
+    else:
+        settings["minimizetotray"] = True
+        main.protocol("WM_DELETE_WINDOW", main.iconify)
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
+        json.dump(settings, b)
+
+
 def ping():
     try:
         host = pingaddr.get()
@@ -97,7 +114,7 @@ def themeSel():
         settings['theme'] = 'dark'
     elif themeVar.get() == 1:
         settings['theme'] = 'light'
-    with open('settings.json', 'w') as b:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
         json.dump(settings, b)
     global themefg
     global themebg
@@ -287,11 +304,13 @@ def buttondefinitions():
     timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
     pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
-    infoText.grid(row=0, column=0, sticky=NSEW)
+    quitbutton = Button(homeFrame, text='Quit', command=exit, bg='red', fg=themefg)
+    infoText.grid(row=0, column=1, sticky=NSEW)
     calcButton.grid(row=1, column=0, sticky=NSEW)
-    timerButton.grid(row=2, column=0, sticky=NSEW)
-    settingsButton.grid(row=4, column=0, sticky=NSEW)
-    pingButton.grid(row=3, column=0, sticky=NSEW)
+    timerButton.grid(row=1, column=2, sticky=NSEW)
+    settingsButton.grid(row=2, column=0, sticky=NSEW)
+    pingButton.grid(row=2, column=2, sticky=NSEW)
+    quitbutton.grid(row=3, column=1, sticky=NSEW)
 
     homeFrame.grid_columnconfigure(1, weight=1)
     homeFrame.grid_rowconfigure(0, weight=1)
@@ -305,7 +324,7 @@ def buttondefinitions():
     pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
     pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
-    homebutton = Button(pingFrame, text='Home', command=returnHome, bg=themebg, fg=themefg)
+    homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green', fg=themefg)
     pingText.grid(row=0, column=0)
     pingEntry.grid(row=1, column=0)
     pingbutton.grid(row=1, column=1)
@@ -393,18 +412,24 @@ def buttondefinitions():
         themeVar.set('0')
     elif settings['theme'] == 'light':
         themeVar.set(1)
+    if not settings['minimizetotray']:
+        mttVar.set('0')
+    elif settings['minimizetotray']:
+        mttVar.set('1')
 
     darkRadio = Radiobutton(settingsFrame, text='Dark mode', variable=themeVar, command=themeSel,
                             value=0, bg=themebg, fg=themefg)
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
                              value=1, bg=themebg, fg=themefg)
-    #mocCheckbox =
+    mttCheckbox = Checkbutton(settingsFrame, text="Minimize to tray", variable=mttVar, onvalue=1, offvalue=0,
+                               command=mtt, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
-    versionNum = Label(settingsFrame, text='Version 0.9.1', fg=themefg, bg=themebg)
+    versionNum = Label(settingsFrame, text=hb_version, fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
-    homeButton.grid(row=2, column=0)
-    versionNum.grid(row=3, column=0)
+    mttCheckbox.grid(row=2, column=0)
+    homeButton.grid(row=3, column=0)
+    versionNum.grid(row=4, column=0)
 
 buttondefinitions()
 
