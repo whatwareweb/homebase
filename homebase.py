@@ -1,11 +1,19 @@
+"""
+TO DO:
+- Fix "theme change issue" where calculator entry widget does not change theme
+- (Line 416) Minimize on close option(linux)/close to tray (windows)
+"""
+
+from playsound import playsound
+#playsound('boot.wav')
 from tkinter import *
 from tkinter import messagebox
 import time
-from playsound import playsound
 from threading import Thread
 import json
 import subprocess
 import platform
+from appdirs import *
 
 # INITIALIZATIONS
 
@@ -29,11 +37,12 @@ pauseState = 0
 equation = StringVar()
 pingaddr = StringVar()
 currentFrame = 'home'
+settingspath = 0
 try:
-    with open("settings.json", "r") as a:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
         settings = json.load(a)
 except:
-    with open("./settings.json", "r") as a:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
         settings = json.load(a)
 
 if settings['theme'] == 'dark':
@@ -269,8 +278,8 @@ def calcclear():
 def buttondefinitions():
     global timerPauseButton
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
-    
-    
+
+
     # HOME SCREEN
 
     infoText = Label(homeFrame, text='Homebase', font=('Arial', 18, ''), bg=themebg, fg=themefg)
@@ -337,6 +346,7 @@ def buttondefinitions():
     # CALC SCREEN
 
     expression_field = Entry(calcFrame, textvariable=equation, bg=themebg, fg=themefg)
+    expression_field.configure(bg=themebg, fg=themefg)
     expression_field.grid(columnspan=4, ipadx=70)
     equation.set('Enter your equation!')
     button1 = Button(calcFrame, text=' 1 ', command=lambda: press(1), height=1, width=7, bg=themebg, fg=themefg)
@@ -388,6 +398,7 @@ def buttondefinitions():
                             value=0, bg=themebg, fg=themefg)
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
                              value=1, bg=themebg, fg=themefg)
+    #mocCheckbox =
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
     versionNum = Label(settingsFrame, text='Version 0.9.1', fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
