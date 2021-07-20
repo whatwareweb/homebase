@@ -105,7 +105,7 @@ def ping():
 
 
 def topinger():
-    homeFrame.pack_forget()
+    homeFrame.place_forget()
     pingFrame.pack()
 
 
@@ -126,7 +126,7 @@ def themeSel():
         themebg = 'white'
     buttondefinitions()
     main.update()
-    homeFrame.pack_forget()
+    homeFrame.place_forget()
     main.configure(bg=themebg)
     settingsFrame.configure(bg=themebg)
     homeFrame.configure(bg=themebg)
@@ -136,7 +136,7 @@ def themeSel():
 
 
 def toSettings():
-    homeFrame.pack_forget()
+    homeFrame.place_forget()
     settingsFrame.pack()
 
 
@@ -237,7 +237,7 @@ def submit():
 def toTimer():
     global currentFrame
     currentFrame = 'timer'
-    homeFrame.pack_forget()
+    homeFrame.place_forget()
     timerFrame.pack()
 
 
@@ -245,7 +245,7 @@ def returnHome():
     global currentFrame
     currentFrame = 'home'
     calcFrame.pack_forget()
-    homeFrame.pack()
+    homeFrame.place(width=270, height=150)
     timerFrame.pack_forget()
     settingsFrame.pack_forget()
     pingFrame.pack_forget()
@@ -254,7 +254,7 @@ def returnHome():
 def calcScr():
     global currentFrame
     currentFrame = 'calculator'
-    homeFrame.pack_forget()
+    homeFrame.place_forget()
     calcFrame.pack()
 
 
@@ -305,19 +305,14 @@ def buttondefinitions():
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
     pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
     quitbutton = Button(homeFrame, text='Quit', command=exit, bg='red', fg=themefg)
-    infoText.grid(row=0, column=1, sticky=NSEW)
-    calcButton.grid(row=1, column=0, sticky=NSEW)
-    timerButton.grid(row=1, column=2, sticky=NSEW)
-    settingsButton.grid(row=2, column=0, sticky=NSEW)
-    pingButton.grid(row=2, column=2, sticky=NSEW)
-    quitbutton.grid(row=3, column=1, sticky=NSEW)
+    infoText.place(x=75, y=0, width=120, height=20)
+    calcButton.place(x=15, y=30, width=120 , height=30)
+    timerButton.place(x=15, y=60, width=120, height=30)
+    pingButton.place(x=135, y=30, width=120, height=30)
+    settingsButton.place(x=135, y=60, width=120, height=30)
+    quitbutton.place(x=230, y=120, width=40, height=30)
 
-    homeFrame.grid_columnconfigure(1, weight=1)
-    homeFrame.grid_rowconfigure(0, weight=1)
-    homeFrame.grid_rowconfigure(1, weight=1)
-    homeFrame.grid_rowconfigure(2, weight=1)
-
-    homeFrame.pack()
+    homeFrame.place(width=270, height=150)
 
     # PING SCREEN
 
