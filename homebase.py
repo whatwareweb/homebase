@@ -16,7 +16,7 @@ from appdirs import *
 # INITIALIZATIONS
 
 
-hb_version = "0.9.2"
+hb_version = "0.9.3"
 main = Tk()
 main.geometry('270x150')
 main.title('Homebase')
