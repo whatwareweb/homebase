@@ -11,7 +11,6 @@ import time
 from threading import Thread
 import json
 import subprocess
-import platform
 from appdirs import *
 
 # INITIALIZATIONS
@@ -38,13 +37,37 @@ equation = StringVar()
 pingaddr = StringVar()
 mttVar = IntVar()
 currentFrame = 'home'
-settingspath = 0
-try:
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
-        settings = json.load(a)
-except:
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
-        settings = json.load(a)
+
+
+def settingsWrite():
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
+        json.dump(settings, b)
+
+
+with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
+    data = a.read()
+if data != "":
+    settings = json.loads(data)
+else:
+    settings = {"version": "0.9.2", "theme": "light", "customalarm": "alarm.wav", "minimizetotray": True}
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as a:
+        a.write(json.dumps(settings))
+
+if settings['version'] != hb_version:
+    settings['version'] = hb_version
+if not settings['version']:
+        settings['version'] = hb_version
+if not settings['theme']:
+        settings['theme'] = 'dark'
+if not settings['customalarm']:
+        settings['customalarm'] = 'alarm.wav'
+if not settings['minimizetotray']:
+        settings['minimizetotray'] = True
+settingsWrite()
+
+
+
+
 
 if settings["minimizetotray"] == True:
     main.protocol("WM_DELETE_WINDOW", main.iconify)
