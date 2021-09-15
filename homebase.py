@@ -23,9 +23,9 @@ main.title('Homebase')
 main.resizable(False, False)
 main.geometry('270x150')
 try:
-    main.iconbitmap('homebase-logo.ico')
+    main.iconbitmap('logo.ico')
 except:
-    main.iconbitmap('./homebase-logo.ico')
+    main.iconbitmap('./logo.gif')
 
 expression = ''
 expressionText = ''
