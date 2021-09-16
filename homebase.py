@@ -1,6 +1,6 @@
 """
 TO DO:
-- Fix "theme change issue" where calculator entry widget does not change theme
+- Change EVERYTHING from a grid layout to being placed
 """
 
 from playsound import playsound
@@ -12,6 +12,7 @@ from threading import Thread
 import json
 import subprocess
 from appdirs import *
+import os
 
 # INITIALIZATIONS
 
@@ -21,7 +22,7 @@ main = Tk()
 main.geometry('270x150')
 main.title('Homebase')
 main.resizable(False, False)
-main.geometry('270x150')
+main.geometry('270x152')
 try:
     main.iconbitmap('logo.ico')
 except:
@@ -49,23 +50,24 @@ try:
     if data != "":
         settings = json.loads(data)
     else:
-        settings = {"version": "0.9.2", "theme": "light", "customalarm": "alarm.wav", "minimizetotray": True}
+        settings = {"version": hb_version, "theme": "dark", "customalarm": "alarm.wav", "minimizetotray": True}
         with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as a:
             a.write(json.dumps(settings))
 except:
-    settings = {"version": "0.9.2", "theme": "light", "customalarm": "alarm.wav", "minimizetotray": True}
+    os.makedirs(user_data_dir('Homebase', 'WhatWare'))
+    settings = {"version": hb_version, "theme": "dark", "customalarm": "alarm.wav", "minimizetotray": True}
     with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as a:
         a.write(json.dumps(settings))
 
 if settings['version'] != hb_version:
     settings['version'] = hb_version
-if not settings['version']:
+if settings['version'] is None:
         settings['version'] = hb_version
-if not settings['theme']:
+if settings['theme'] is None:
         settings['theme'] = 'dark'
-if not settings['customalarm']:
+if settings['customalarm'] is None:
         settings['customalarm'] = 'alarm.wav'
-if not settings['minimizetotray']:
+if settings['minimizetotray'] is None:
         settings['minimizetotray'] = True
 settingsWrite()
 
@@ -113,8 +115,7 @@ def mtt():
     else:
         settings["minimizetotray"] = True
         main.protocol("WM_DELETE_WINDOW", main.iconify)
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
-        json.dump(settings, b)
+    settingsWrite()
 
 
 def ping():
@@ -271,8 +272,8 @@ def toTimer():
 def returnHome():
     global currentFrame
     currentFrame = 'home'
-    calcFrame.pack_forget()
-    homeFrame.place(width=270, height=150)
+    calcFrame.place_forget()
+    homeFrame.place(width=270, height=152)
     timerFrame.pack_forget()
     settingsFrame.pack_forget()
     pingFrame.pack_forget()
@@ -282,7 +283,7 @@ def calcScr():
     global currentFrame
     currentFrame = 'calculator'
     homeFrame.place_forget()
-    calcFrame.pack()
+    calcFrame.place(width=270, height=152)
 
 
 def press(num):
@@ -331,22 +332,22 @@ def buttondefinitions():
     timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
     pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
-    quitbutton = Button(homeFrame, text='Quit', command=exit, bg='red', fg=themefg)
+    quitbutton = Button(homeFrame, text='Quit', command=exit, bg='red')
     infoText.place(x=75, y=0, width=120, height=20)
     calcButton.place(x=15, y=30, width=120 , height=30)
     timerButton.place(x=15, y=60, width=120, height=30)
     pingButton.place(x=135, y=30, width=120, height=30)
     settingsButton.place(x=135, y=60, width=120, height=30)
-    quitbutton.place(x=230, y=120, width=40, height=30)
+    quitbutton.place(x=230, y=122, width=40, height=30)
 
-    homeFrame.place(width=270, height=150)
+    homeFrame.place(width=270, height=152)
 
     # PING SCREEN
 
     pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
     pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
-    homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green', fg=themefg)
+    homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green')
     pingText.grid(row=0, column=0)
     pingEntry.grid(row=1, column=0)
     pingbutton.grid(row=1, column=1)
@@ -369,11 +370,11 @@ def buttondefinitions():
     spacer1.grid(row=2, column=1, sticky=NSEW)
     timerPauseButton = Button(timerFrame, text='Pause', command=timerPause, bg=themebg, fg=themefg)
     timerPauseButton.grid(row=3, column=0, sticky=NSEW)
-    timerSubmit = Button(timerFrame, text='Start Timer', command=submit, bg='blue', fg=themefg)
+    timerSubmit = Button(timerFrame, text='Start Timer', command=submit, bg='blue')
     timerSubmit.grid(row=3, column=1, sticky=NSEW)
     timerStopButton = Button(timerFrame, text='Stop', command=timerStop, bg=themebg, fg=themefg)
     timerStopButton.grid(row=3, column=2, sticky=NSEW)
-    toHome = Button(timerFrame, text='Home', command=returnHome, bg='green', fg=themefg)
+    toHome = Button(timerFrame, text='Home', command=returnHome, bg='green')
     toHome.grid(row=4, column=1, sticky=NSEW)
     timerFrame.columnconfigure(0, weight=1)
     timerFrame.columnconfigure(1, weight=1)
@@ -387,45 +388,60 @@ def buttondefinitions():
     # CALC SCREEN
 
     expression_field = Entry(calcFrame, textvariable=equation, bg=themebg, fg=themefg)
-    expression_field.configure(bg=themebg, fg=themefg)
-    expression_field.grid(columnspan=4, ipadx=70)
-    equation.set('Enter your equation!')
+    expression_field.place(x=0, y=0, width=270, height=22.5)
     button1 = Button(calcFrame, text=' 1 ', command=lambda: press(1), height=1, width=7, bg=themebg, fg=themefg)
-    button1.grid(row=2, column=0)
+    #button1.grid(row=2, column=0)
+    button1.place(x=0, y=22)
     button2 = Button(calcFrame, text=' 2 ', command=lambda: press(2), height=1, width=7, bg=themebg, fg=themefg)
-    button2.grid(row=2, column=1)
+    #button2.grid(row=2, column=1)
+    button2.place(x=70, y=22)
     button3 = Button(calcFrame, text=' 3 ', command=lambda: press(3), height=1, width=7, bg=themebg, fg=themefg)
-    button3.grid(row=2, column=2)
+    #button3.grid(row=2, column=2)
+    button3.place(x=140, y=22)
     button4 = Button(calcFrame, text=' 4 ', command=lambda: press(4), height=1, width=7, bg=themebg, fg=themefg)
-    button4.grid(row=3, column=0)
+    #button4.grid(row=3, column=0)
+    button4.place(x=0, y=48)
     button5 = Button(calcFrame, text=' 5 ', command=lambda: press(5), height=1, width=7, bg=themebg, fg=themefg)
-    button5.grid(row=3, column=1)
+    #button5.grid(row=3, column=1)
+    button5.place(x=70, y=48)
     button6 = Button(calcFrame, text=' 6 ', command=lambda: press(6), height=1, width=7, bg=themebg, fg=themefg)
-    button6.grid(row=3, column=2)
+    #button6.grid(row=3, column=2)
+    button6.place(x=140, y=48)
     button7 = Button(calcFrame, text=' 7 ', command=lambda: press(7), height=1, width=7, bg=themebg, fg=themefg)
-    button7.grid(row=4, column=0)
+    #button7.grid(row=4, column=0)
+    button7.place(x=0, y=74)
     button8 = Button(calcFrame, text=' 8 ', command=lambda: press(8), height=1, width=7, bg=themebg, fg=themefg)
-    button8.grid(row=4, column=1)
+    #button8.grid(row=4, column=1)
+    button8.place(x=70, y=74)
     button9 = Button(calcFrame, text=' 9 ', command=lambda: press(9), height=1, width=7, bg=themebg, fg=themefg)
-    button9.grid(row=4, column=2)
+    #button9.grid(row=4, column=2)
+    button9.place(x=140, y=74)
     button0 = Button(calcFrame, text=' 0 ', command=lambda: press(0), height=1, width=7, bg=themebg, fg=themefg)
-    button0.grid(row=5, column=0)
+    #button0.grid(row=5, column=0)
+    button0.place(x=0, y=100)
     plus = Button(calcFrame, text=' + ', command=lambda: press("+"), height=1, width=7, bg=themebg, fg=themefg)
-    plus.grid(row=2, column=3)
+    #plus.grid(row=2, column=3)
+    plus.place(x=211, y=22)
     minus = Button(calcFrame, text=' - ', command=lambda: press("-"), height=1, width=7, bg=themebg, fg=themefg)
-    minus.grid(row=3, column=3)
+    #minus.grid(row=3, column=3)
+    minus.place(x=211, y=48)
     multiply = Button(calcFrame, text=' × ', command=lambda: press("*"), height=1, width=7, bg=themebg, fg=themefg)
-    multiply.grid(row=4, column=3)
+    #multiply.grid(row=4, column=3)
+    multiply.place(x=211, y=74)
     divide = Button(calcFrame, text=' ÷ ', command=lambda: press("/"), height=1, width=7, bg=themebg, fg=themefg)
-    divide.grid(row=5, column=3)
+    #divide.grid(row=5, column=3)
+    divide.place(x=211, y=100)
     equal = Button(calcFrame, text=' = ', command=equalpress, height=1, width=7, bg=themebg, fg=themefg)
-    equal.grid(row=5, column=2)
+    #equal.grid(row=5, column=2)
+    equal.place(x=140, y=100)
     clear = Button(calcFrame, text='Clear', command=calcclear, height=1, width=7, bg=themebg, fg=themefg)
-    clear.grid(row=5, column='1')
+    #clear.grid(row=5, column='1')
+    clear.place(x=70, y=100)
     Decimal = Button(calcFrame, text='.', command=lambda: press('.'), height=1, width=7, bg=themebg, fg=themefg)
-    Decimal.grid(row=6, column=0)
-    Home = Button(calcFrame, text='Home', bg='green', command=returnHome, height=1, width=7, fg=themefg)
-    Home.grid(row=6, column=3)
+    #Decimal.grid(row=6, column=0)
+    Decimal.place(x=211, y=126)
+    Home = Button(calcFrame, text='Home', bg='green', command=returnHome, height=1, width=7)
+    Home.place(x=0, y=126)
     main.bind("<KeyPress>", keyPressed)
 
     # SETTINGS SCREEN
@@ -439,12 +455,12 @@ def buttondefinitions():
     elif settings['minimizetotray']:
         mttVar.set('1')
 
-    darkRadio = Radiobutton(settingsFrame, text='Dark mode', variable=themeVar, command=themeSel,
-                            value=0, bg=themebg, fg=themefg)
-    lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel,
-                             value=1, bg=themebg, fg=themefg)
+    darkRadio = Radiobutton(settingsFrame, text='Dark mode', variable=themeVar, command=themeSel, value=0, bg=themebg,
+                            fg=themefg)
+    lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel, value=1,
+                             bg=themebg, fg=themefg)
     mttCheckbox = Checkbutton(settingsFrame, text="Minimize to tray", variable=mttVar, onvalue=1, offvalue=0,
-                               command=mtt, bg=themebg, fg=themefg)
+                              command=mtt, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
     versionNum = Label(settingsFrame, text=hb_version, fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
