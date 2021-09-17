@@ -13,6 +13,7 @@ import json
 import subprocess
 from appdirs import *
 import os
+import base64
 
 # INITIALIZATIONS
 
@@ -26,7 +27,7 @@ main.geometry('270x152')
 try:
     main.iconbitmap('logo.ico')
 except:
-    main.iconbitmap('./logo.gif')
+    main.tk.call('wm', 'iconphoto', main._w, PhotoImage(file='logo.gif'))
 
 expression = ''
 expressionText = ''
