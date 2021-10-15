@@ -1,10 +1,4 @@
-"""
-TO DO:
-- Change EVERYTHING from a grid layout to being placed
-"""
-
-from playsound import playsound
-#playsound('boot.wav')
+import playsound
 from tkinter import *
 from tkinter import messagebox
 import time
@@ -13,7 +7,8 @@ import json
 import subprocess
 from appdirs import *
 import os
-import base64
+import platform
+
 
 # INITIALIZATIONS
 
@@ -40,24 +35,24 @@ pingaddr = StringVar()
 mttVar = IntVar()
 currentFrame = 'home'
 
-
+pathsep = '\\' if platform.system().lower() == 'windows' else '/'
 def settingsWrite():
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as b:
         json.dump(settings, b)
 
 try:
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "r") as a:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "r") as a:
         data = a.read()
     if data != "":
         settings = json.loads(data)
     else:
         settings = {"version": hb_version, "theme": "dark", "customalarm": "alarm.wav", "minimizetotray": True}
-        with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as a:
+        with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as a:
             a.write(json.dumps(settings))
 except:
     os.makedirs(user_data_dir('Homebase', 'WhatWare'))
     settings = {"version": hb_version, "theme": "dark", "customalarm": "alarm.wav", "minimizetotray": True}
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as a:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as a:
         a.write(json.dumps(settings))
 
 if settings['version'] != hb_version:
@@ -127,6 +122,7 @@ def ping():
         pingaddr.set(subprocess.call(command) == 0)
     except:
         pingaddr.set('Error!')
+        return
     if pingaddr.get() == '0':
         pingaddr.set('Error!')
     else:
@@ -143,7 +139,7 @@ def themeSel():
         settings['theme'] = 'dark'
     elif themeVar.get() == 1:
         settings['theme'] = 'light'
-    with open(f"{user_data_dir('Homebase', 'WhatWare')}\\settings.json", "w") as b:
+    with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as b:
         json.dump(settings, b)
     global themefg
     global themebg
@@ -170,12 +166,11 @@ def toSettings():
 
 
 def timersound():
-    playsound(settings['customalarm'])
+    playsound.playsound(settings['customalarm'])
 
 
 def timermsg():
     messagebox.showwarning('Time is up!', 'Time is up!')
-
 
 
 def keyPressed(event):
