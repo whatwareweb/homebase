@@ -451,7 +451,7 @@ def buttondefinitions():
     elif settings['minimizetotray']:
         mttVar.set('1')
 
-    darkRadio = Radiobutton(settingsFrame, text='Dark mode (LOOKS BAD ON YOUR OS)' if platform.system().lower() == 'darwin' else 'Dark mode', variable=themeVar, command=themeSel, value=0, bg=themebg,
+    darkRadio = Radiobutton(settingsFrame, text='Dark mode (LOOKS BAD ON MACOS)' if platform.system().lower() == 'darwin' else 'Dark mode', variable=themeVar, command=themeSel, value=0, bg=themebg,
                             fg=themefg)
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel, value=1,
                              bg=themebg, fg=themefg)
