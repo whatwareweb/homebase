@@ -127,6 +127,8 @@ def ping():
         pingaddr.set('Error!')
     else:
         pingaddr.set(f'{host} is up')
+        
+pingthread = Thread(target=ping)
 
 
 def topinger():
@@ -149,7 +151,7 @@ def themeSel():
     else:
         themefg = 'black'
         themebg = 'white'
-    buttondefinitions()
+    gui()
     main.update()
     homeFrame.place_forget()
     main.configure(bg=themebg)
@@ -232,10 +234,17 @@ def submit():
     global pauseState
     if pauseState == 1:
         pauseState = 0
+
+    timerthread = Thread(target=timerloop)
+    timerthread.start()
+
+
+def timerloop():
     try:
         temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
     except:
         return
+
     while temp > -1 and pauseState == 0:
         mins, secs = divmod(temp, 60)
         hours = 0
@@ -244,7 +253,6 @@ def submit():
         hour.set("{0:2d}".format(hours))
         minute.set("{0:2d}".format(mins))
         second.set("{0:2d}".format(secs))
-        timerFrame.update()
         time.sleep(1)
         if temp == 0 and pauseState == 0:
             a = Thread(target=timersound)
@@ -253,7 +261,6 @@ def submit():
             b.start()
         if pauseState == 0:
             temp -= 1
-            timerFrame.update()
         if pauseState == 2:
             temp = 0
 
@@ -317,7 +324,7 @@ def calcclear():
     expressionText = ""
 
 
-def buttondefinitions():
+def gui():
     global timerPauseButton
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
 
@@ -343,7 +350,7 @@ def buttondefinitions():
 
     pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
-    pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
+    pingbutton = Button(pingFrame, text='Ping', command=pingthread.start, bg=themebg, fg=themefg)
     homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green')
     pingText.grid(row=0, column=0)
     pingEntry.grid(row=1, column=0)
@@ -466,6 +473,8 @@ def buttondefinitions():
     homeButton.grid(row=3, column=0)
     versionNum.grid(row=4, column=0)
 
-buttondefinitions()
+
+guithread = Thread(target=gui)
+guithread.start()
 
 main.mainloop()
