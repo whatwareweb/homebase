@@ -9,7 +9,6 @@ from appdirs import *
 import os
 import platform
 
-
 # INITIALIZATIONS
 
 
@@ -36,9 +35,12 @@ mttVar = IntVar()
 currentFrame = 'home'
 
 pathsep = '\\' if platform.system().lower() == 'windows' else '/'
+
+
 def settingsWrite():
     with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as b:
         json.dump(settings, b)
+
 
 try:
     with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "r") as a:
@@ -58,18 +60,14 @@ except:
 if settings['version'] != hb_version:
     settings['version'] = hb_version
 if settings['version'] is None:
-        settings['version'] = hb_version
+    settings['version'] = hb_version
 if settings['theme'] is None:
-        settings['theme'] = 'dark'
+    settings['theme'] = 'dark'
 if settings['customalarm'] is None:
-        settings['customalarm'] = 'alarm.wav'
+    settings['customalarm'] = 'alarm.wav'
 if settings['minimizetotray'] is None:
-        settings['minimizetotray'] = True
+    settings['minimizetotray'] = True
 settingsWrite()
-
-
-
-
 
 if settings["minimizetotray"] == True:
     main.protocol("WM_DELETE_WINDOW", main.iconify)
@@ -84,7 +82,6 @@ else:
     themebg = 'white'
 main.configure(bg=themebg)
 themeVar = IntVar()
-
 
 # FRAMES
 
@@ -127,8 +124,6 @@ def ping():
         pingaddr.set('Error!')
     else:
         pingaddr.set(f'{host} is up')
-        
-pingthread = Thread(target=ping)
 
 
 def topinger():
@@ -169,10 +164,12 @@ def toSettings():
 
 def timersound():
     playsound.playsound(settings['customalarm'])
+    exit()
 
 
 def timermsg():
     messagebox.showwarning('Time is up!', 'Time is up!')
+    exit()
 
 
 def keyPressed(event):
@@ -207,7 +204,6 @@ def timerStop():
     hour.set('')
     minute.set('')
     second.set('')
-
 
 
 def timerPause():
@@ -255,10 +251,11 @@ def timerloop():
         second.set("{0:2d}".format(secs))
         time.sleep(1)
         if temp == 0 and pauseState == 0:
-            a = Thread(target=timersound)
-            b = Thread(target=timermsg)
-            a.start()
-            b.start()
+            timersoundthread = Thread(target=timersound)
+            timermsgthread = Thread(target=timermsg)
+            timersoundthread.start()
+            timermsgthread.start()
+            exit()
         if pauseState == 0:
             temp -= 1
         if pauseState == 2:
@@ -328,7 +325,6 @@ def gui():
     global timerPauseButton
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
 
-
     # HOME SCREEN
 
     infoText = Label(homeFrame, text='Homebase', font=('Arial', 18, ''), bg=themebg, fg=themefg)
@@ -338,7 +334,7 @@ def gui():
     pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
     quitbutton = Button(homeFrame, text='Quit', command=main.destroy, bg='red')
     infoText.place(x=75, y=0, width=120, height=20)
-    calcButton.place(x=15, y=30, width=120 , height=30)
+    calcButton.place(x=15, y=30, width=120, height=30)
     timerButton.place(x=15, y=60, width=120, height=30)
     pingButton.place(x=135, y=30, width=120, height=30)
     settingsButton.place(x=135, y=60, width=120, height=30)
@@ -350,7 +346,7 @@ def gui():
 
     pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
-    pingbutton = Button(pingFrame, text='Ping', command=pingthread.start, bg=themebg, fg=themefg)
+    pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
     homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green')
     pingText.grid(row=0, column=0)
     pingEntry.grid(row=1, column=0)
@@ -365,11 +361,14 @@ def gui():
     minuteText.grid(row=0, column=1, sticky=NSEW)
     secondText = Label(timerFrame, text='Seconds', bg=themebg, fg=themefg)
     secondText.grid(row=0, column=2, sticky=NSEW)
-    hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour, bg=themebg, fg=themefg, insertbackground=themefg)
+    hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour, bg=themebg, fg=themefg,
+                      insertbackground=themefg)
     hourEntry.grid(row=1, column=0, sticky=NSEW)
-    minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute, bg=themebg, fg=themefg, insertbackground=themefg)
+    minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute, bg=themebg, fg=themefg,
+                        insertbackground=themefg)
     minuteEntry.grid(row=1, column=1, sticky=NSEW)
-    secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg, insertbackground=themefg)
+    secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg,
+                        insertbackground=themefg)
     secondEntry.grid(row=1, column=2, sticky=NSEW)
     spacer1.grid(row=2, column=1, sticky=NSEW)
     timerPauseButton = Button(timerFrame, text='Pause', command=timerPause, bg=themebg, fg=themefg)
@@ -394,55 +393,55 @@ def gui():
     expression_field = Entry(calcFrame, textvariable=equation, bg=themebg, fg=themefg)
     expression_field.place(x=0, y=0, width=270, height=22.5)
     button1 = Button(calcFrame, text=' 1 ', command=lambda: press(1), height=1, width=7, bg=themebg, fg=themefg)
-    #button1.grid(row=2, column=0)
+    # button1.grid(row=2, column=0)
     button1.place(x=0, y=22)
     button2 = Button(calcFrame, text=' 2 ', command=lambda: press(2), height=1, width=7, bg=themebg, fg=themefg)
-    #button2.grid(row=2, column=1)
+    # button2.grid(row=2, column=1)
     button2.place(x=70, y=22)
     button3 = Button(calcFrame, text=' 3 ', command=lambda: press(3), height=1, width=7, bg=themebg, fg=themefg)
-    #button3.grid(row=2, column=2)
+    # button3.grid(row=2, column=2)
     button3.place(x=140, y=22)
     button4 = Button(calcFrame, text=' 4 ', command=lambda: press(4), height=1, width=7, bg=themebg, fg=themefg)
-    #button4.grid(row=3, column=0)
+    # button4.grid(row=3, column=0)
     button4.place(x=0, y=48)
     button5 = Button(calcFrame, text=' 5 ', command=lambda: press(5), height=1, width=7, bg=themebg, fg=themefg)
-    #button5.grid(row=3, column=1)
+    # button5.grid(row=3, column=1)
     button5.place(x=70, y=48)
     button6 = Button(calcFrame, text=' 6 ', command=lambda: press(6), height=1, width=7, bg=themebg, fg=themefg)
-    #button6.grid(row=3, column=2)
+    # button6.grid(row=3, column=2)
     button6.place(x=140, y=48)
     button7 = Button(calcFrame, text=' 7 ', command=lambda: press(7), height=1, width=7, bg=themebg, fg=themefg)
-    #button7.grid(row=4, column=0)
+    # button7.grid(row=4, column=0)
     button7.place(x=0, y=74)
     button8 = Button(calcFrame, text=' 8 ', command=lambda: press(8), height=1, width=7, bg=themebg, fg=themefg)
-    #button8.grid(row=4, column=1)
+    # button8.grid(row=4, column=1)
     button8.place(x=70, y=74)
     button9 = Button(calcFrame, text=' 9 ', command=lambda: press(9), height=1, width=7, bg=themebg, fg=themefg)
-    #button9.grid(row=4, column=2)
+    # button9.grid(row=4, column=2)
     button9.place(x=140, y=74)
     button0 = Button(calcFrame, text=' 0 ', command=lambda: press(0), height=1, width=7, bg=themebg, fg=themefg)
-    #button0.grid(row=5, column=0)
+    # button0.grid(row=5, column=0)
     button0.place(x=0, y=100)
     plus = Button(calcFrame, text=' + ', command=lambda: press("+"), height=1, width=7, bg=themebg, fg=themefg)
-    #plus.grid(row=2, column=3)
+    # plus.grid(row=2, column=3)
     plus.place(x=211, y=22)
     minus = Button(calcFrame, text=' - ', command=lambda: press("-"), height=1, width=7, bg=themebg, fg=themefg)
-    #minus.grid(row=3, column=3)
+    # minus.grid(row=3, column=3)
     minus.place(x=211, y=48)
     multiply = Button(calcFrame, text=' × ', command=lambda: press("*"), height=1, width=7, bg=themebg, fg=themefg)
-    #multiply.grid(row=4, column=3)
+    # multiply.grid(row=4, column=3)
     multiply.place(x=211, y=74)
     divide = Button(calcFrame, text=' ÷ ', command=lambda: press("/"), height=1, width=7, bg=themebg, fg=themefg)
-    #divide.grid(row=5, column=3)
+    # divide.grid(row=5, column=3)
     divide.place(x=211, y=100)
     equal = Button(calcFrame, text=' = ', command=equalpress, height=1, width=7, bg=themebg, fg=themefg)
-    #equal.grid(row=5, column=2)
+    # equal.grid(row=5, column=2)
     equal.place(x=140, y=100)
     clear = Button(calcFrame, text='Clear', command=calcclear, height=1, width=7, bg=themebg, fg=themefg)
-    #clear.grid(row=5, column='1')
+    # clear.grid(row=5, column='1')
     clear.place(x=70, y=100)
     Decimal = Button(calcFrame, text='.', command=lambda: press('.'), height=1, width=7, bg=themebg, fg=themefg)
-    #Decimal.grid(row=6, column=0)
+    # Decimal.grid(row=6, column=0)
     Decimal.place(x=211, y=126)
     Home = Button(calcFrame, text='Home', bg='green', command=returnHome, height=1, width=7)
     Home.place(x=0, y=126)
@@ -459,7 +458,9 @@ def gui():
     elif settings['minimizetotray']:
         mttVar.set('1')
 
-    darkRadio = Radiobutton(settingsFrame, text='Dark mode (LOOKS BAD ON MACOS)' if platform.system().lower() == 'darwin' else 'Dark mode', variable=themeVar, command=themeSel, value=0, bg=themebg,
+    darkRadio = Radiobutton(settingsFrame,
+                            text='Dark mode (LOOKS BAD ON MACOS)' if platform.system().lower() == 'darwin' else 'Dark mode',
+                            variable=themeVar, command=themeSel, value=0, bg=themebg,
                             fg=themefg)
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel, value=1,
                              bg=themebg, fg=themefg)
