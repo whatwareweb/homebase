@@ -13,7 +13,7 @@ import platform
 # INITIALIZATIONS
 
 
-hb_version = "0.9.3"
+hb_version = "1.0"
 main = Tk()
 main.geometry('270x150')
 main.title('Homebase')
@@ -316,6 +316,7 @@ def calcclear():
     equation.set("")
     expressionText = ""
 
+
 def buttondefinitions():
     global timerPauseButton
     spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
@@ -328,7 +329,7 @@ def buttondefinitions():
     timerButton = Button(homeFrame, text='Timer', command=toTimer, bg=themebg, fg=themefg)
     settingsButton = Button(homeFrame, text='Settings', command=toSettings, bg=themebg, fg=themefg)
     pingButton = Button(homeFrame, text='Pinger', command=topinger, bg=themebg, fg=themefg)
-    quitbutton = Button(homeFrame, text='Quit', command=exit, bg='red')
+    quitbutton = Button(homeFrame, text='Quit', command=main.destroy, bg='red')
     infoText.place(x=75, y=0, width=120, height=20)
     calcButton.place(x=15, y=30, width=120 , height=30)
     timerButton.place(x=15, y=60, width=120, height=30)
