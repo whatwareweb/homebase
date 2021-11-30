@@ -5,11 +5,7 @@ This is a simple python app that has lots of basic functions.
 
 ### dependencies
 
-Run the command `pip install -r requirements.txt` in the directory of `requirements.txt`
-
-### dev version info
-
-The dev version is only tested on windows until we are ready to release a new version, then we test it on all platforms. Because of this, some functions may not work and it may be unstable on operating systems other than windows. Your best bet if you don't know anything about python is to comment out the line. `#comment it with a hashtag like this`
+Run the command `pip install -r requirements.txt` in the directory of `requirements.txt
 
 ### other info
 
