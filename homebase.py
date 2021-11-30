@@ -1,4 +1,3 @@
-import playsound
 from tkinter import *
 from tkinter import messagebox
 import time
@@ -8,13 +7,15 @@ import subprocess
 from appdirs import *
 import os
 import platform
+from pydub import AudioSegment
+from pydub.playback import play
+from plyer import notification
 
 # INITIALIZATIONS
 
 
 hb_version = "1.0"
 main = Tk()
-main.geometry('270x150')
 main.title('Homebase')
 main.resizable(False, False)
 main.geometry('270x152')
@@ -86,17 +87,11 @@ themeVar = IntVar()
 # FRAMES
 
 
-homeFrame = Frame(main)
-calcFrame = Frame(main)
-timerFrame = Frame(main)
-settingsFrame = Frame(main)
-pingFrame = Frame(main)
-homeFrame.configure(bg=themebg)
-calcFrame.configure(bg=themebg)
-timerFrame.configure(bg=themebg)
-settingsFrame.configure(bg=themebg)
-pingFrame.configure(bg=themebg)
-
+homeFrame = Frame(main, bg=themebg)
+calcFrame = Frame(main, bg=themebg)
+timerFrame = Frame(main, bg=themebg)
+settingsFrame = Frame(main, bg=themebg)
+pingFrame = Frame(main, bg=themebg)
 
 # FUNCTIONS
 
@@ -160,16 +155,6 @@ def themeSel():
 def toSettings():
     homeFrame.place_forget()
     settingsFrame.pack()
-
-
-def timersound():
-    playsound.playsound(settings['customalarm'])
-    exit()
-
-
-def timermsg():
-    messagebox.showwarning('Time is up!', 'Time is up!')
-    exit()
 
 
 def keyPressed(event):
@@ -251,10 +236,16 @@ def timerloop():
         second.set("{0:2d}".format(secs))
         time.sleep(1)
         if temp == 0 and pauseState == 0:
-            timersoundthread = Thread(target=timersound)
-            timermsgthread = Thread(target=timermsg)
-            timersoundthread.start()
-            timermsgthread.start()
+            hour.set('')
+            minute.set('')
+            second.set('')
+            notification.notify(
+                title="Homebase",
+                message="Time is up.",
+                timeout=10
+            )
+            sound = AudioSegment.from_wav('alarm.wav')
+            play(sound)
             exit()
         if pauseState == 0:
             temp -= 1
