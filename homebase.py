@@ -10,11 +10,13 @@ from pydub import AudioSegment
 from pydub.playback import play
 from plyer import notification
 import base64
+from pystray import MenuItem as item
+import pystray
+from PIL import Image, ImageTk
 
 # INITIALIZATIONS
 
-
-hb_version = "1.1-dev"
+hb_version = "1.1-dev2"
 main = Tk()
 main.title('Homebase')
 main.resizable(False, False)
@@ -72,8 +74,27 @@ if settings['minimizetotray'] is None:
     settings['minimizetotray'] = True
 settingsWrite()
 
+def quit_window(icon, item):
+   icon.stop()
+   main.destroy()
+
+
+def show_window(icon, item):
+   icon.stop()
+   main.after(0,main.deiconify)
+
+
+def hide_window():
+   main.withdraw()
+   image=Image.open("logo.gif")
+   menu=(item('Quit', quit_window), item('Show', show_window), pystray.MenuItem(text='Default', action=show_window, visible=False, default=True, enabled=True))
+   icon=pystray.Icon("name", image, "homebase", menu)
+   icon.run()
+
+
 if settings["minimizetotray"] == True:
-    main.protocol("WM_DELETE_WINDOW", main.iconify)
+    main.protocol("WM_DELETE_WINDOW", hide_window)
+
 else:
     main.protocol("WM_DELETE_WINDOW", main.destroy)
 
@@ -105,7 +126,7 @@ def mtt():
         main.protocol("WM_DELETE_WINDOW", main.destroy)
     else:
         settings["minimizetotray"] = True
-        main.protocol("WM_DELETE_WINDOW", main.iconify)
+        main.protocol("WM_DELETE_WINDOW", hide_window)
     settingsWrite()
 
 
