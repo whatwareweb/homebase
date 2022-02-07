@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter import messagebox
 import time
 from threading import Thread
 import json
@@ -10,19 +9,22 @@ import platform
 from pydub import AudioSegment
 from pydub.playback import play
 from plyer import notification
+import base64
 
 # INITIALIZATIONS
 
 
-hb_version = "1.0"
+hb_version = "1.1-dev"
 main = Tk()
 main.title('Homebase')
 main.resizable(False, False)
 main.geometry('270x152')
-try:
+if platform.system().lower() == "windows":
     main.iconbitmap('logo.ico')
-except:
-    main.tk.call('wm', 'iconphoto', main._w, PhotoImage(file='logo.gif'))
+else:
+    with open('logo.gif', 'rb') as icon_gif:
+        _icon_base64 = base64.b64encode(icon_gif.read())
+    main.iconbitmap(_icon_base64)
 
 expression = ''
 expressionText = ''
@@ -92,6 +94,7 @@ calcFrame = Frame(main, bg=themebg)
 timerFrame = Frame(main, bg=themebg)
 settingsFrame = Frame(main, bg=themebg)
 pingFrame = Frame(main, bg=themebg)
+
 
 # FUNCTIONS
 
@@ -241,6 +244,7 @@ def timerloop():
             second.set('')
             notification.notify(
                 title="Homebase",
+                app_icon="logo.ico" if platform.system().lower() == 'windows' else 'logo.gif',
                 message="Time is up.",
                 timeout=10
             )
@@ -337,7 +341,7 @@ def gui():
 
     pingText = Label(pingFrame, text='Pinger', bg=themebg, fg=themefg)
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
-    pingbutton = Button(pingFrame, text='Ping', command=ping, bg=themebg, fg=themefg)
+    pingbutton = Button(pingFrame, text='Ping', command=lambda: Thread(target=ping).start(), bg=themebg, fg=themefg)
     homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green')
     pingText.grid(row=0, column=0)
     pingEntry.grid(row=1, column=0)
@@ -450,7 +454,7 @@ def gui():
         mttVar.set('1')
 
     darkRadio = Radiobutton(settingsFrame,
-                            text='Dark mode (LOOKS BAD ON MACOS)' if platform.system().lower() == 'darwin' else 'Dark mode',
+                            text='Dark mode' if platform.system().lower() != 'darwin' else 'Dark mode (LOOKS BAD ON MACOS)',
                             variable=themeVar, command=themeSel, value=0, bg=themebg,
                             fg=themefg)
     lightRadio = Radiobutton(settingsFrame, text='Light mode', variable=themeVar, command=themeSel, value=1,
@@ -458,7 +462,7 @@ def gui():
     mttCheckbox = Checkbutton(settingsFrame, text="Minimize to tray", variable=mttVar, onvalue=1, offvalue=0,
                               command=mtt, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
-    versionNum = Label(settingsFrame, text=hb_version, fg=themefg, bg=themebg)
+    versionNum = Label(settingsFrame, text=f"Version: {hb_version}", fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
     mttCheckbox.grid(row=2, column=0)
