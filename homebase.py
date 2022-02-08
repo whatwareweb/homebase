@@ -9,14 +9,15 @@ import platform
 from pydub import AudioSegment
 from pydub.playback import play
 from plyer import notification
+from plyer import filechooser
 import base64
-from pystray import MenuItem as item
+from pystray import MenuItem as Item
 import pystray
-from PIL import Image, ImageTk
+from PIL import Image
 
 # INITIALIZATIONS
 
-hb_version = "1.1-dev2"
+hb_version = "1.1-dev3"
 main = Tk()
 main.title('Homebase')
 main.resizable(False, False)
@@ -37,6 +38,7 @@ pauseState = 0
 equation = StringVar()
 pingaddr = StringVar()
 mttVar = IntVar()
+alarmEntryText = StringVar()
 currentFrame = 'home'
 
 pathsep = '\\' if platform.system().lower() == 'windows' else '/'
@@ -74,6 +76,8 @@ if settings['minimizetotray'] is None:
     settings['minimizetotray'] = True
 settingsWrite()
 
+alarmEntryText.set(settings['customalarm'])
+
 def quit_window(icon, item):
    icon.stop()
    main.destroy()
@@ -87,7 +91,7 @@ def show_window(icon, item):
 def hide_window():
    main.withdraw()
    image=Image.open("logo.gif")
-   menu=(item('Quit', quit_window), item('Show', show_window), pystray.MenuItem(text='Default', action=show_window, visible=False, default=True, enabled=True))
+   menu=(Item('Quit', quit_window), Item('Show', show_window), Item(text='Default', action=show_window, visible=False, default=True, enabled=True))
    icon=pystray.Icon("name", image, "homebase", menu)
    icon.run()
 
@@ -118,6 +122,12 @@ pingFrame = Frame(main, bg=themebg)
 
 
 # FUNCTIONS
+
+
+def chooseAlarm():
+    alarmEntryText.set(filechooser.open_file()[0])
+    settings['customalarm'] = str(alarmEntryText.get())
+    settingsWrite()
 
 
 def mtt():
@@ -269,7 +279,7 @@ def timerloop():
                 message="Time is up.",
                 timeout=10
             )
-            sound = AudioSegment.from_wav('alarm.wav')
+            sound = AudioSegment.from_file(str(alarmEntryText.get()))
             play(sound)
             exit()
         if pauseState == 0:
@@ -293,6 +303,8 @@ def returnHome():
     timerFrame.pack_forget()
     settingsFrame.pack_forget()
     pingFrame.pack_forget()
+    if str(alarmEntryText.get()) != str(settings['customalarm']):
+        settings['customalarm'] = alarmEntryText.get()
 
 
 def calcScr():
@@ -482,13 +494,19 @@ def gui():
                              bg=themebg, fg=themefg)
     mttCheckbox = Checkbutton(settingsFrame, text="Minimize to tray", variable=mttVar, onvalue=1, offvalue=0,
                               command=mtt, bg=themebg, fg=themefg)
+    alarmPathLabel = Label(settingsFrame, text='Alarm file:', fg=themefg, bg=themebg)
+    alarmPathEntry = Entry(settingsFrame, textvariable=alarmEntryText, bg=themebg, fg=themefg)
+    alarmPathSelButton = Button(settingsFrame, text='📁', command=chooseAlarm, bg=themebg, fg=themefg)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
     versionNum = Label(settingsFrame, text=f"Version: {hb_version}", fg=themefg, bg=themebg)
     darkRadio.grid(row=0, column=0)
     lightRadio.grid(row=1, column=0)
     mttCheckbox.grid(row=2, column=0)
-    homeButton.grid(row=3, column=0)
-    versionNum.grid(row=4, column=0)
+    alarmPathLabel.grid(row=3, column=0)
+    alarmPathEntry.grid(row=4, column=0)
+    alarmPathSelButton.grid(row=4, column=1)
+    homeButton.grid(row=5, column=0)
+    versionNum.grid(row=6, column=0)
 
 
 guithread = Thread(target=gui)
