@@ -1,6 +1,7 @@
 from tkinter import *
 import time
 from threading import Thread
+from threading import Timer
 import json
 import subprocess
 from appdirs import *
@@ -35,11 +36,13 @@ hour = StringVar()
 minute = StringVar()
 second = StringVar()
 pauseState = 0
+stopState = False
 equation = StringVar()
 pingaddr = StringVar()
 mttVar = IntVar()
 alarmEntryText = StringVar()
 currentFrame = 'home'
+temp = 0
 
 pathsep = '\\' if platform.system().lower() == 'windows' else '/'
 
@@ -64,10 +67,7 @@ except:
     with open(f"{user_data_dir('Homebase', 'WhatWare')}{pathsep}settings.json", "w") as a:
         a.write(json.dumps(settings))
 
-if settings['version'] != hb_version:
-    settings['version'] = hb_version
-if settings['version'] is None:
-    settings['version'] = hb_version
+settings['version'] = hb_version
 if settings['theme'] is None:
     settings['theme'] = 'dark'
 if settings['customalarm'] is None:
@@ -78,22 +78,24 @@ settingsWrite()
 
 alarmEntryText.set(settings['customalarm'])
 
-def quit_window(icon, item):
-   icon.stop()
-   main.destroy()
+
+def quit_window(icon):
+    icon.stop()
+    main.destroy()
 
 
-def show_window(icon, item):
-   icon.stop()
-   main.after(0,main.deiconify)
+def show_window(icon):
+    icon.stop()
+    main.after(0, main.deiconify)
 
 
 def hide_window():
-   main.withdraw()
-   image=Image.open("logo.gif")
-   menu=(Item('Quit', quit_window), Item('Show', show_window), Item(text='Default', action=show_window, visible=False, default=True, enabled=True))
-   icon=pystray.Icon("name", image, "homebase", menu)
-   icon.run()
+    main.withdraw()
+    image = Image.open("logo.gif")
+    menu = (Item('Quit', quit_window), Item('Show', show_window),
+            Item(text='Default', action=show_window, visible=False, default=True, enabled=True))
+    icon = pystray.Icon("name", image, "homebase", menu)
+    icon.run()
 
 
 if settings["minimizetotray"] == True:
@@ -124,8 +126,15 @@ pingFrame = Frame(main, bg=themebg)
 # FUNCTIONS
 
 
+def setAlarm():
+    settings['customalarm'] = alarmEntryText.get()
+    settingsWrite()
+
 def chooseAlarm():
-    alarmEntryText.set(filechooser.open_file()[0])
+    try:
+        alarmEntryText.set(filechooser.open_file()[0])
+    except IndexError:
+        return
     settings['customalarm'] = str(alarmEntryText.get())
     settingsWrite()
 
@@ -157,7 +166,7 @@ def ping():
 
 def topinger():
     homeFrame.place_forget()
-    pingFrame.pack()
+    pingFrame.place(width=270, height=152)
 
 
 def themeSel():
@@ -217,14 +226,6 @@ def calcBack():
     equation.set(expressionText)
 
 
-def timerStop():
-    global pauseState
-    pauseState = 1
-    hour.set('')
-    minute.set('')
-    second.set('')
-
-
 def timerPause():
     global pauseState
     global timerPauseButton
@@ -240,27 +241,40 @@ def timerPause():
 
 
 def submit():
+    global stopState
+    global pauseState
     if hour.get() == '':
         hour.set('0')
     if minute.get() == '':
         minute.set('0')
     if second.get() == '':
         second.set('0')
-    global pauseState
-    if pauseState == 1:
-        pauseState = 0
-
-    timerthread = Thread(target=timerloop)
-    timerthread.start()
+    if stopState:
+        print('Stopping timer')
+        pauseState = 1
+        hour.set('')
+        minute.set('')
+        second.set('')
+        timerSubmit['text'] = 'Start'
+        timerSubmit['bg'] = 'blue'
+        stopState = False
+    elif not stopState:
+        print('Starting timer')
+        timerSubmit['text'] = 'Stop'
+        timerSubmit['bg'] = 'red'
+        stopState = True
+        global temp
+        temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
+        if pauseState == 1:
+            pauseState = 0
+        timerloop()
 
 
 def timerloop():
-    try:
-        temp = int(hour.get()) * 3600 + int(minute.get()) * 60 + int(second.get())
-    except:
-        return
+    global pauseState
+    global temp
 
-    while temp > -1 and pauseState == 0:
+    if temp > -1 and pauseState == 0:
         mins, secs = divmod(temp, 60)
         hours = 0
         if mins > 60:
@@ -270,9 +284,7 @@ def timerloop():
         second.set("{0:2d}".format(secs))
         time.sleep(1)
         if temp == 0 and pauseState == 0:
-            hour.set('')
-            minute.set('')
-            second.set('')
+            submit()
             notification.notify(
                 title="Homebase",
                 app_icon="logo.ico" if platform.system().lower() == 'windows' else 'logo.gif',
@@ -281,28 +293,28 @@ def timerloop():
             )
             sound = AudioSegment.from_file(str(alarmEntryText.get()))
             play(sound)
-            exit()
+            pauseState = None
+        else:
+            Timer(1, timerloop).start()
         if pauseState == 0:
             temp -= 1
-        if pauseState == 2:
-            temp = 0
 
 
 def toTimer():
     global currentFrame
     currentFrame = 'timer'
     homeFrame.place_forget()
-    timerFrame.pack()
+    timerFrame.place(width=270, height=152)
 
 
 def returnHome():
     global currentFrame
     currentFrame = 'home'
-    calcFrame.place_forget()
     homeFrame.place(width=270, height=152)
-    timerFrame.pack_forget()
+    calcFrame.place_forget()
+    timerFrame.place_forget()
     settingsFrame.pack_forget()
-    pingFrame.pack_forget()
+    pingFrame.place_forget()
     if str(alarmEntryText.get()) != str(settings['customalarm']):
         settings['customalarm'] = alarmEntryText.get()
 
@@ -349,9 +361,9 @@ def calcclear():
     expressionText = ""
 
 
-def gui():
+class gui():
     global timerPauseButton
-    spacer1 = Label(timerFrame, text=" ", bg=themebg, fg=themefg)
+    global timerSubmit
 
     # HOME SCREEN
 
@@ -376,45 +388,38 @@ def gui():
     pingEntry = Entry(pingFrame, textvariable=pingaddr, bg=themebg, fg=themefg)
     pingbutton = Button(pingFrame, text='Ping', command=lambda: Thread(target=ping).start(), bg=themebg, fg=themefg)
     homebutton = Button(pingFrame, text='Home', command=returnHome, bg='green')
-    pingText.grid(row=0, column=0)
-    pingEntry.grid(row=1, column=0)
-    pingbutton.grid(row=1, column=1)
-    homebutton.grid(row=2, column=0)
+    # pingText.grid(row=0, column=0)
+    # pingEntry.grid(row=1, column=0)
+    # pingbutton.grid(row=1, column=1)
+    # homebutton.grid(row=2, column=0)
+    pingText.place(x=75, y=0, width=120, height=30)
+    pingEntry.place(x=75, y=30, width=120, height=20)
+    pingbutton.place(x=196, y=30, width=30, height=20)
+    homebutton.place(x=110, y=60, width=50, height=30)
 
     # TIMER SCREEN
 
     hourText = Label(timerFrame, text='Hours', bg=themebg, fg=themefg)
-    hourText.grid(row=0, column=0, sticky=NSEW)
     minuteText = Label(timerFrame, text='Minutes', bg=themebg, fg=themefg)
-    minuteText.grid(row=0, column=1, sticky=NSEW)
     secondText = Label(timerFrame, text='Seconds', bg=themebg, fg=themefg)
-    secondText.grid(row=0, column=2, sticky=NSEW)
     hourEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=hour, bg=themebg, fg=themefg,
                       insertbackground=themefg)
-    hourEntry.grid(row=1, column=0, sticky=NSEW)
     minuteEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=minute, bg=themebg, fg=themefg,
                         insertbackground=themefg)
-    minuteEntry.grid(row=1, column=1, sticky=NSEW)
     secondEntry = Entry(timerFrame, width=3, font=("Arial", 18, ""), textvariable=second, bg=themebg, fg=themefg,
                         insertbackground=themefg)
-    secondEntry.grid(row=1, column=2, sticky=NSEW)
-    spacer1.grid(row=2, column=1, sticky=NSEW)
     timerPauseButton = Button(timerFrame, text='Pause', command=timerPause, bg=themebg, fg=themefg)
-    timerPauseButton.grid(row=3, column=0, sticky=NSEW)
-    timerSubmit = Button(timerFrame, text='Start Timer', command=submit, bg='blue')
-    timerSubmit.grid(row=3, column=1, sticky=NSEW)
-    timerStopButton = Button(timerFrame, text='Stop', command=timerStop, bg=themebg, fg=themefg)
-    timerStopButton.grid(row=3, column=2, sticky=NSEW)
+    timerSubmit = Button(timerFrame, text='Start', command=submit, bg='blue')
     toHome = Button(timerFrame, text='Home', command=returnHome, bg='green')
-    toHome.grid(row=4, column=1, sticky=NSEW)
-    timerFrame.columnconfigure(0, weight=1)
-    timerFrame.columnconfigure(1, weight=1)
-    timerFrame.columnconfigure(2, weight=1)
-    timerFrame.rowconfigure(0, weight=1)
-    timerFrame.rowconfigure(1, weight=1)
-    timerFrame.rowconfigure(2, weight=1)
-    timerFrame.rowconfigure(3, weight=1)
-    timerFrame.rowconfigure(4, weight=1)
+    hourText.place(x=65, y=0, width=50, height=20)
+    minuteText.place(x=110, y=0, width=50, height=20)
+    secondText.place(x=160, y=0, width=50, height=20)
+    hourEntry.place(x=65, y=25, width=50, height=40)
+    minuteEntry.place(x=110, y=25, width=50, height=40)
+    secondEntry.place(x=160, y=25, width=50, height=40)
+    timerSubmit.place(x=135, y=65, width=75, height=30)
+    timerPauseButton.place(x=65, y=65, width=75, height=30)
+    toHome.place(x=110, y=95, width=50, height=30)
 
     # CALC SCREEN
 
@@ -497,19 +502,18 @@ def gui():
     alarmPathLabel = Label(settingsFrame, text='Alarm file:', fg=themefg, bg=themebg)
     alarmPathEntry = Entry(settingsFrame, textvariable=alarmEntryText, bg=themebg, fg=themefg)
     alarmPathSelButton = Button(settingsFrame, text='📁', command=chooseAlarm, bg=themebg, fg=themefg)
+    alarmPathCheck = Button(settingsFrame, text='✓', command=setAlarm)
     homeButton = Button(settingsFrame, text='Home', command=returnHome, bg='green')
     versionNum = Label(settingsFrame, text=f"Version: {hb_version}", fg=themefg, bg=themebg)
-    darkRadio.grid(row=0, column=0)
-    lightRadio.grid(row=1, column=0)
-    mttCheckbox.grid(row=2, column=0)
-    alarmPathLabel.grid(row=3, column=0)
-    alarmPathEntry.grid(row=4, column=0)
-    alarmPathSelButton.grid(row=4, column=1)
-    homeButton.grid(row=5, column=0)
-    versionNum.grid(row=6, column=0)
+    darkRadio.grid(row=0, column=1)
+    lightRadio.grid(row=1, column=1)
+    mttCheckbox.grid(row=2, column=1)
+    alarmPathLabel.grid(row=3, column=1)
+    alarmPathEntry.grid(row=4, column=1)
+    alarmPathSelButton.grid(row=4, column=0)
+    alarmPathCheck.grid(row=4, column=2)
+    homeButton.grid(row=5, column=1)
+    versionNum.grid(row=6, column=1)
 
-
-guithread = Thread(target=gui)
-guithread.start()
 
 main.mainloop()
